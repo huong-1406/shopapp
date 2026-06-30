@@ -12,6 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class ProductImage {
+    public static final int MAXIMUM_IMAGES_PER_PRODUCT = 5;
 
     @Id//khoá chính
     @GeneratedValue(strategy = GenerationType.IDENTITY)//database tự đọng tăng giá trị thêm 1

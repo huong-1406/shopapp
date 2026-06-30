@@ -31,15 +31,6 @@ public class ProductDTO {
     @JsonProperty("category_id")
     private Long categoryId;
 
-    private List<MultipartFile> files;
 
-    // Bạn chèn thêm đoạn này vào cuối file ProductDTO.java nhé
-    public List<MultipartFile> getFiles() {
-        return this.files;
-    }
 
-    public void setFiles(List<MultipartFile> files) {
-        this.files = files;
-    }
- // Đây là dấu ngoặc nhọn đóng class cũ của bạn
 }

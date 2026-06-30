@@ -1,5 +1,6 @@
 package com.example.shopapp;
 
+import com.example.shopapp.responses.ProductResponse;
 import com.example.shopapp.dtos.ProductDTO;
 import com.example.shopapp.dtos.ProductImageDTO;
 import com.example.shopapp.exceptions.DataNoteFoundException;
@@ -10,6 +11,7 @@ import com.example.shopapp.models.ProductImage;
 import com.example.shopapp.repositories.CategoryRepository;
 import com.example.shopapp.repositories.ProductImageRepository;
 import com.example.shopapp.repositories.ProductRepository;
+import com.example.shopapp.responses.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +38,7 @@ public class ProductService implements IProductServicce{
                 .name(productDTO.getName())
                 .price(productDTO.getPrice())
                 .thumbnail(productDTO.getThumbnail())
+                .description(productDTO.getDescription())
                 .category(existingCategory)
                 .build();
         return productRepository.save(newProduct);
@@ -50,9 +53,10 @@ public class ProductService implements IProductServicce{
     }
 
     @Override
-    public Page<Product> getAllProducts(PageRequest pageRequest) {
+    public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
         //lấy  danh sách sản phẩm theo trang(page) và giới hạn(limit):tổng số sản phẩm bên trong 1 trang
-        return productRepository.findAll(pageRequest);
+
+                return productRepository.findAll(pageRequest).map(ProductResponse::fromProduct);
     }
 
     @Override
@@ -99,7 +103,7 @@ public class ProductService implements IProductServicce{
             ProductImageDTO productImageDTO) throws Exception//them 1 ảnh vào sản phẩm này
     {
         Product existingProduct = productRepository// kiểm soát dầu vào ví dụ dữ liệu ngời dùng đẩy lên
-                .findById(productImageDTO.getProductId())
+                .findById(productId)
                 .orElseThrow(() ->
                         new DataNoteFoundException(
                                 "Cannot find product with id: " +productImageDTO.getProductId() ));
@@ -111,8 +115,10 @@ public class ProductService implements IProductServicce{
                 .build();
         //không cho insert quá 56 ảnh cho 1 sản phẩm
         int size = productImageRepository.findByProductId(productId).size();
-        if(size >=5){
-            throw new InvalidParamException("Number of images must be <=5");
+        if(size >= ProductImage.MAXIMUM_IMAGES_PER_PRODUCT){
+            throw new InvalidParamException(
+                    "Number of images must be <= "
+                     + ProductImage.MAXIMUM_IMAGES_PER_PRODUCT);
         }
         return productImageRepository.save(newProductImage);
     }
